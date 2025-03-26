@@ -1,0 +1,121 @@
+﻿@model IEnumerable<Business.Models.BorrowRecords>
+
+@{
+    ViewData["Title"] = "My Borrowed Books";
+}
+
+<div class="container">
+    <h1>My Borrowed Books</h1>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary active" data-filter="all">All</button>
+                <button type="button" class="btn btn-outline-primary" data-filter="active">Currently Borrowed</button>
+                <button type="button" class="btn btn-outline-primary" data-filter="returned">Returned</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>Book Title</th>
+                    <th>Borrow Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var isOverdue = !item.Returned && DateTime.Now > item.DueDate;
+                    var rowClass = isOverdue ? "table-danger" : 
+                                 item.Returned ? "table-success" : "";
+
+                    <tr class="@rowClass borrow-record @(item.Returned ? "returned" : "active")">
+                        <td>@item.Book.Title</td>
+                        <td>@item.BorrowDate.ToString("MMM dd, yyyy")</td>
+                        <td>@item.DueDate.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            @if (item.Returned)
+                            {
+                                <span class="badge bg-success">Returned on @item.ReturnDate?.ToString("MMM dd")</span>
+                            }
+                            else if (isOverdue)
+                            {
+                                <span class="badge bg-danger">Overdue</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">Borrowed</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@item.ID" 
+                                   class="btn btn-sm btn-info">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </a>
+                                @if (!item.Returned)
+                                {
+                                    <form asp-action="Return" asp-route-id="@item.ID" 
+                                          method="post" class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to return this book?');">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-undo"></i> Return
+                                        </button>
+                                    </form>
+
+                                    if (!isOverdue)
+                                    {
+                                        <form asp-action="Extend" asp-route-id="@item.ID" 
+                                              method="post" class="d-inline"
+                                              onsubmit="return confirm('Do you want to extend the due date by 7 days?');">
+                                            <button type="submit" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-clock"></i> Extend
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <h4>No borrowed books</h4>
+            <p>You haven't borrowed any books yet. Visit our <a asp-controller="Books" asp-action="Index">catalog</a> to find books to borrow.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.btn-group button').click(function() {
+                // Update active button
+                $('.btn-group button').removeClass('active');
+                $(this).addClass('active');
+
+                // Get filter type
+                var filter = $(this).data('filter');
+
+                // Show/hide rows based on filter
+                if (filter === 'all') {
+                    $('.borrow-record').show();
+                } else {
+                    $('.borrow-record').hide();
+                    $('.borrow-record.' + filter).show();
+                }
+            });
+        });
+    </script>
+}

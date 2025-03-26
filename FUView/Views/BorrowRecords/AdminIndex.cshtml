@@ -1,0 +1,159 @@
+@model IEnumerable<Business.Models.BorrowRecords>
+
+@{
+    ViewData["Title"] = "Borrow Records Management";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Borrow Records Management</h1>
+        <a asp-action="Overdue" class="btn btn-warning">
+            <i class="fas fa-exclamation-circle"></i> View Overdue Books
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by title or user...">
+                </div>
+                <div class="col-md-3">
+                    <select id="statusFilter" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="borrowed">Currently Borrowed</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" id="dateFilter" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <button id="resetFilters" class="btn btn-secondary">Reset Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>User</th>
+                    <th>Borrow Date</th>
+                    <th>Due Date</th>
+                    <th>Return Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var isOverdue = !item.Returned && DateTime.Now > item.DueDate;
+                    var statusClass = isOverdue ? "table-danger" : 
+                                    item.Returned ? "table-success" : "";
+
+                    <tr class="@statusClass borrow-record" 
+                        data-user="@item.User.FullName.ToLower()" 
+                        data-book="@item.Book.Title.ToLower()"
+                        data-status="@(item.Returned ? "returned" : (isOverdue ? "overdue" : "borrowed"))">
+                        <td>
+                            <a asp-controller="Books" asp-action="Details" asp-route-id="@item.BookID">
+                                @item.Book.Title
+                            </a>
+                        </td>
+                        <td>
+                            @item.User.FullName
+                            <small class="d-block text-muted">@item.User.Email</small>
+                        </td>
+                        <td>@item.BorrowDate.ToString("yyyy-MM-dd")</td>
+                        <td>@item.DueDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @(item.ReturnDate?.ToString("yyyy-MM-dd") ?? "-")
+                        </td>
+                        <td>
+                            @if (item.Returned)
+                            {
+                                <span class="badge bg-success">Returned</span>
+                            }
+                            else if (isOverdue)
+                            {
+                                <span class="badge bg-danger">Overdue</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">Borrowed</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-sm btn-info">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
+                                @if (!item.Returned)
+                                {
+                                    <form asp-action="Return" asp-route-id="@item.ID" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success" 
+                                                onclick="return confirm('Mark this book as returned?')">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+
+                                    if (!isOverdue)
+                                    {
+                                        <form asp-action="Extend" asp-route-id="@item.ID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-warning"
+                                                    onclick="return confirm('Extend due date by 7 days?')">
+                                                <i class="fas fa-clock"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            function filterRecords() {
+                var searchText = $('#searchInput').val().toLowerCase();
+                var status = $('#statusFilter').val();
+                var date = $('#dateFilter').val();
+
+                $('.borrow-record').each(function() {
+                    var $row = $(this);
+                    var rowUser = $row.data('user');
+                    var rowBook = $row.data('book');
+                    var rowStatus = $row.data('status');
+                    var rowDate = $row.find('td:eq(2)').text(); // Borrow date
+
+                    var matchesSearch = (rowUser + ' ' + rowBook).indexOf(searchText) > -1;
+                    var matchesStatus = !status || rowStatus === status;
+                    var matchesDate = !date || rowDate === date;
+
+                    $row.toggle(matchesSearch && matchesStatus && matchesDate);
+                });
+            }
+
+            $('#searchInput').on('keyup', filterRecords);
+            $('#statusFilter').on('change', filterRecords);
+            $('#dateFilter').on('change', filterRecords);
+
+            $('#resetFilters').click(function() {
+                $('#searchInput').val('');
+                $('#statusFilter').val('');
+                $('#dateFilter').val('');
+                $('.borrow-record').show();
+            });
+        });
+    </script>
+}

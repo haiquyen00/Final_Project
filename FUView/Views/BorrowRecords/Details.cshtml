@@ -1,0 +1,160 @@
+﻿@model Business.Models.BorrowRecords
+
+@{
+    ViewData["Title"] = "Borrow Record Details";
+    var isOverdue = !Model.Returned && DateTime.Now > Model.DueDate;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Borrow Record Details</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Book Title</dt>
+                        <dd class="col-sm-9">
+                            <a asp-controller="Books" asp-action="Details" asp-route-id="@Model.BookID">
+                                @Model.Book.Title
+                            </a>
+                        </dd>
+
+                        <dt class="col-sm-3">Author</dt>
+                        <dd class="col-sm-9">@Model.Book.Author</dd>
+
+                        <dt class="col-sm-3">Borrower</dt>
+                        <dd class="col-sm-9">
+                            @Model.User.FullName
+                            <small class="text-muted d-block">@Model.User.Email</small>
+                        </dd>
+
+                        <dt class="col-sm-3">Borrow Date</dt>
+                        <dd class="col-sm-9">@Model.BorrowDate.ToString("MMMM dd, yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-3">Due Date</dt>
+                        <dd class="col-sm-9">
+                            <span class="@(isOverdue ? "text-danger" : "")">
+                                @Model.DueDate.ToString("MMMM dd, yyyy")
+                            </span>
+                        </dd>
+
+                        @if (Model.Returned)
+                        {
+                            <dt class="col-sm-3">Return Date</dt>
+                            <dd class="col-sm-9">@Model.ReturnDate?.ToString("MMMM dd, yyyy HH:mm")</dd>
+                        }
+
+                        <dt class="col-sm-3">Status</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Returned)
+                            {
+                                <span class="badge bg-success">Returned</span>
+                            }
+                            else if (isOverdue)
+                            {
+                                <span class="badge bg-danger">Overdue</span>
+                                <small class="text-danger d-block">
+                                    Overdue by @((DateTime.Now - Model.DueDate).Days) days
+                                </small>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">Borrowed</span>
+                                <small class="text-muted d-block">
+                                    Due in @((Model.DueDate - DateTime.Now).Days) days
+                                </small>
+                            }
+                        </dd>
+                    </dl>
+
+                    @if (!Model.Returned)
+                    {
+                        <div class="mt-4">
+                            <div class="btn-group">
+                                <form asp-action="Return" asp-route-id="@Model.ID" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-success" 
+                                            onclick="return confirm('Mark this book as returned?')">
+                                        <i class="fas fa-check"></i> Return Book
+                                    </button>
+                                </form>
+
+                                @if (!isOverdue)
+                                {
+                                    <form asp-action="Extend" asp-route-id="@Model.ID" method="post" class="d-inline ms-2">
+                                        <button type="submit" class="btn btn-warning"
+                                                onclick="return confirm('Extend due date by 7 days?')">
+                                            <i class="fas fa-clock"></i> Extend Due Date
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Book Status</h4>
+                </div>
+                <div class="card-body">
+                    <dl>
+                        <dt>Total Copies</dt>
+                        <dd>@Model.Book.Quantity</dd>
+
+                        <dt>Available Copies</dt>
+                        <dd>
+                            @{
+                                var borrowedCount = Model.Book.BorrowRecords?.Count(br => !br.Returned) ?? 0;
+                                var availableCount = Model.Book.Quantity - borrowedCount;
+                            }
+                            @availableCount
+                        </dd>
+
+                        <dt>Category</dt>
+                        <dd>@(Model.Book.Category?.Name ?? "Uncategorized")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Borrower History</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Other books borrowed by @Model.User.FullName:</p>
+                        <ul class="list-unstyled">
+                            @foreach (var record in Model.User.BorrowRecords.OrderByDescending(br => br.BorrowDate).Take(5))
+                            {
+                                if (record.ID != Model.ID)
+                                {
+                                    <li class="mb-2">
+                                        <a asp-action="Details" asp-route-id="@record.ID">
+                                            @record.Book.Title
+                                        </a>
+                                        <small class="text-muted d-block">
+                                            @record.BorrowDate.ToString("MMM dd, yyyy")
+                                            - @(record.Returned ? "Returned" : "Active")
+                                        </small>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>

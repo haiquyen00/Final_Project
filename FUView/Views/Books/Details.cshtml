@@ -1,0 +1,179 @@
+﻿@model Business.Models.Books
+
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>@Model.Title</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <dl class="row">
+                                <dt class="col-sm-4">Author</dt>
+                                <dd class="col-sm-8">@Model.Author</dd>
+
+                                <dt class="col-sm-4">ISBN</dt>
+                                <dd class="col-sm-8">@Model.ISBN</dd>
+
+                                <dt class="col-sm-4">Category</dt>
+                                <dd class="col-sm-8">@(Model.Category?.Name ?? "Uncategorized")</dd>
+
+                                <dt class="col-sm-4">Total Copies</dt>
+                                <dd class="col-sm-8">@Model.Quantity</dd>
+
+                                <dt class="col-sm-4">Available</dt>
+                                <dd class="col-sm-8">
+                                    @{
+                                        var borrowedCount = Model.BorrowRecords?.Count(br => !br.Returned) ?? 0;
+                                        var availableCount = Model.Quantity - borrowedCount;
+                                        var statusClass = availableCount > 0 ? "text-success" : "text-danger";
+                                    }
+                                    <span class="@statusClass">@availableCount</span>
+                                </dd>
+
+                                <dt class="col-sm-4">Added On</dt>
+                                <dd class="col-sm-8">@Model.CreateAt.ToString("MMMM dd, yyyy")</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-4">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="d-grid gap-2">
+                                    <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-warning mb-2">
+                                        <i class="fas fa-edit"></i> Edit Book
+                                    </a>
+                                    @if (borrowedCount == 0)
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-danger mb-2">
+                                            <i class="fas fa-trash"></i> Delete Book
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                if (availableCount > 0)
+                                {
+                                    <a asp-controller="BorrowRecords" asp-action="Create" asp-route-bookId="@Model.ID" 
+                                       class="btn btn-success">
+                                        <i class="fas fa-book"></i> Borrow Book
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="fas fa-ban"></i> Not Available
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (User.IsInRole("Admin") && Model.BorrowRecords != null && Model.BorrowRecords.Any())
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3>Borrow History</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Borrowed</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var record in Model.BorrowRecords.OrderByDescending(br => br.BorrowDate))
+                                    {
+                                        <tr>
+                                            <td>@record.User.FullName</td>
+                                            <td>@record.BorrowDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@record.DueDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @if (record.Returned)
+                                                {
+                                                    <span class="badge bg-success">Returned</span>
+                                                }
+                                                else if (DateTime.Now > record.DueDate)
+                                                {
+                                                    <span class="badge bg-danger">Overdue</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">Borrowed</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a asp-controller="BorrowRecords" asp-action="Details" 
+                                                   asp-route-id="@record.ID" class="btn btn-sm btn-info">
+                                                    Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Quick Stats</h3>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <h6 class="mb-1">Current Status</h6>
+                            <p class="mb-0 @(availableCount > 0 ? "text-success" : "text-danger")">
+                                @(availableCount > 0 ? $"{availableCount} copies available" : "All copies borrowed")
+                            </p>
+                        </div>
+                        
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="list-group-item">
+                                <h6 class="mb-1">Total Borrows</h6>
+                                <p class="mb-0">@(Model.BorrowRecords?.Count ?? 0) times</p>
+                            </div>
+
+                            <div class="list-group-item">
+                                <h6 class="mb-1">Current Borrows</h6>
+                                <p class="mb-0">@borrowedCount active</p>
+                            </div>
+
+                            <div class="list-group-item">
+                                <h6 class="mb-1">Overdue</h6>
+                                <p class="mb-0">
+                                    @(Model.BorrowRecords?.Count(br => !br.Returned && DateTime.Now > br.DueDate) ?? 0) books
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>

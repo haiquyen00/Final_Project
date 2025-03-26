@@ -1,0 +1,15 @@
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.csproj.AssemblyReference.cache
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.AssemblyInfoInputs.cache
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.AssemblyInfo.cs
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\bin\Debug\net8.0\DataAccess.deps.json
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\bin\Debug\net8.0\DataAccess.dll
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\bin\Debug\net8.0\DataAccess.pdb
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\bin\Debug\net8.0\Business.dll
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\bin\Debug\net8.0\Business.pdb
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.csproj.Up2Date
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.dll
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\refint\DataAccess.dll
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\DataAccess.pdb
+C:\Users\HELLO\Desktop\PE_PRN222\SP25_PRN222_DE170075\DataAccess\obj\Debug\net8.0\ref\DataAccess.dll

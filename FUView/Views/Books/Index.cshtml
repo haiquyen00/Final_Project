@@ -1,0 +1,75 @@
+﻿@model IEnumerable<Business.Models.Books>
+
+@{
+    ViewData["Title"] = "Library Catalog";
+}
+
+<div class="container">
+    <h1>Library Catalog</h1>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by title, author, or ISBN...">
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4 book-card">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@item.Author</h6>
+                        
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Category: @(item.Category?.Name ?? "Uncategorized")
+                            </small>
+                        </p>
+
+                        <dl class="row">
+                            <dt class="col-sm-4">ISBN:</dt>
+                            <dd class="col-sm-8">@item.ISBN</dd>
+
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                @{
+                                    var availableCount = item.Quantity - (item.BorrowRecords?.Count(br => !br.Returned) ?? 0);
+                                    var statusClass = availableCount > 0 ? "text-success" : "text-danger";
+                                    var statusText = availableCount > 0 ? "Available" : "Not Available";
+                                }
+                                <span class="@statusClass">@statusText</span>
+                            </dd>
+                        </dl>
+
+                        <div class="text-center mt-3">
+                            <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-info btn-sm">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".book-card").filter(function() {
+                    var text = $(this).text().toLowerCase();
+                    $(this).toggle(text.indexOf(value) > -1);
+                });
+            });
+        });
+    </script>
+}

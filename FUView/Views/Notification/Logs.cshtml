@@ -1,0 +1,135 @@
+@model IEnumerable<Business.Models.NotificationLog>
+
+@{
+    ViewData["Title"] = "Notification Logs";
+}
+
+<h1>Notification History</h1>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>User</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Book</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        <span class="badge bg-info">@item.Type</span>
+                    </td>
+                    <td>
+                        @if (item.User != null)
+                        {
+                            <span>@item.User.FullName</span>
+                            <br />
+                            <small class="text-muted">@item.User.Email</small>
+                        }
+                    </td>
+                    <td>@item.Subject</td>
+                    <td>
+                        @if (item.Sent)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Sent
+                                <br />
+                                <small>@item.SentAt?.ToString("HH:mm")</small>
+                            </span>
+                        }
+                        else if (!string.IsNullOrEmpty(item.ErrorMessage))
+                        {
+                            <span class="badge bg-danger" title="@item.ErrorMessage">
+                                <i class="fas fa-times"></i> Failed
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">Pending</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.BorrowRecord?.Book != null)
+                        {
+                            <span>@item.BorrowRecord.Book.Title</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="LogDetails" asp-route-id="@item.ID" class="btn btn-sm btn-info">
+                            <i class="fas fa-search"></i> Details
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Notification Types</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Due Date Reminders
+                        <span class="badge bg-info rounded-pill">
+                            @Model.Count(n => n.Type == "DUE_REMINDER")
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Overdue Notices
+                        <span class="badge bg-info rounded-pill">
+                            @Model.Count(n => n.Type == "OVERDUE_NOTICE")
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Return Confirmations
+                        <span class="badge bg-info rounded-pill">
+                            @Model.Count(n => n.Type == "RETURN_CONFIRMATION")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Delivery Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Successfully Sent
+                        <span class="badge bg-success rounded-pill">
+                            @Model.Count(n => n.Sent)
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Failed
+                        <span class="badge bg-danger rounded-pill">
+                            @Model.Count(n => !n.Sent && !string.IsNullOrEmpty(n.ErrorMessage))
+                        </span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Pending
+                        <span class="badge bg-warning rounded-pill">
+                            @Model.Count(n => !n.Sent && string.IsNullOrEmpty(n.ErrorMessage))
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

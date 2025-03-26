@@ -1,0 +1,141 @@
+﻿@model Business.Models.User
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<!-- Thêm CSS tùy chỉnh -->
+<style>
+    .login-container {
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 100%;
+        margin: 40px auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    main {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: calc(100vh - 56px - 56px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-primary {
+        border-radius: 8px;
+        padding: 10px;
+        font-weight: 500;
+    }
+
+    .form-outline .form-control {
+        border: 1px solid #ced4da !important;
+        border-radius: 4px !important;
+        padding: 10px !important;
+    }
+
+    .form-outline .form-label {
+        color: #495057 !important;
+        background: #fff !important;
+        padding: 0 5px !important;
+    }
+
+    .form-outline .form-control:focus ~ .form-label,
+    .form-outline .form-control:not(:placeholder-shown) ~ .form-label {
+        transform: translateY(-1.5rem) translateX(0.2rem) scale(0.8);
+        background: #fff;
+        padding: 0 5px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+        text-align: center;
+    }
+</style>
+
+<div class="login-container">
+    <h2 class="text-center mb-4">Register</h2>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <div asp-validation-summary="All" class="text-danger"></div>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form asp-action="Register" method="post">
+        <div class="text-center mb-3">
+            <p>Sign up with:</p>
+            <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                <i class="fab fa-facebook-f"></i>
+            </button>
+            <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                <i class="fab fa-google"></i>
+            </button>
+            <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                <i class="fab fa-twitter"></i>
+            </button>
+            <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                <i class="fab fa-github"></i>
+            </button>
+        </div>
+
+        <p class="text-center">or:</p>
+
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input asp-for="FullName" class="form-control" />
+            <label class="form-label" for="FullName">FullName</label>
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input asp-for="Email" class="form-control" />
+            <label class="form-label" for="Email">Email</label>
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input asp-for="Password" type="password" class="form-control" />
+            <label class="form-label" for="Password">Password</label>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-check d-flex justify-content-center mb-4">
+            <input class="form-check-input me-2" type="checkbox" value="" id="registerCheck" checked
+                   aria-describedby="registerCheckHelpText" />
+            <label class="form-check-label" for="registerCheck">
+                I have read and agree to the terms
+            </label>
+        </div>
+
+        <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-3">Sign up</button>
+
+        <div class="text-center">
+            <p>Already a member? <a asp-action="Login" asp-controller="Home">Login</a></p>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+   
+}

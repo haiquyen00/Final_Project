@@ -1,0 +1,134 @@
+@model IEnumerable<Business.Models.Books>
+
+@{
+    ViewData["Title"] = "Book Management";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Book Management</h1>
+        <div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Book
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search books...">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="categoryFilter" class="form-control">
+                        <option value="">All Categories</option>
+                        @foreach (var category in Model.Select(b => b.Category).Distinct())
+                        {
+                            if (category != null)
+                            {
+                                <option value="@category.Name">@category.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select id="availabilityFilter" class="form-control">
+                        <option value="">All Availability</option>
+                        <option value="available">Available</option>
+                        <option value="borrowed">Borrowed</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="booksTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>ISBN</th>
+                    <th>Total</th>
+                    <th>Available</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var borrowedCount = item.BorrowRecords?.Count(br => !br.Returned) ?? 0;
+                    var availableCount = item.Quantity - borrowedCount;
+                    var statusClass = availableCount > 0 ? "bg-success" : "bg-danger";
+
+                    <tr class="book-row">
+                        <td>@item.Title</td>
+                        <td>@item.Author</td>
+                        <td class="category-cell">@(item.Category?.Name ?? "Uncategorized")</td>
+                        <td>@item.ISBN</td>
+                        <td>@item.Quantity</td>
+                        <td>@availableCount</td>
+                        <td>
+                            <span class="badge @statusClass">
+                                @(availableCount > 0 ? "Available" : "All Borrowed")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-info btn-sm">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
+                                @if (borrowedCount == 0)
+                                {
+                                    <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            function filterTable() {
+                var searchText = $("#searchInput").val().toLowerCase();
+                var category = $("#categoryFilter").val();
+                var availability = $("#availabilityFilter").val();
+
+                $(".book-row").each(function() {
+                    var $row = $(this);
+                    var text = $row.text().toLowerCase();
+                    var rowCategory = $row.find(".category-cell").text();
+                    var isAvailable = $row.find(".badge").text().trim() === "Available";
+
+                    var matchesSearch = text.indexOf(searchText) > -1;
+                    var matchesCategory = category === "" || rowCategory === category;
+                    var matchesAvailability = availability === "" || 
+                        (availability === "available" && isAvailable) ||
+                        (availability === "borrowed" && !isAvailable);
+
+                    $row.toggle(matchesSearch && matchesCategory && matchesAvailability);
+                });
+            }
+
+            $("#searchInput, #categoryFilter, #availabilityFilter").on("change keyup", filterTable);
+        });
+    </script>
+}

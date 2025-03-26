@@ -1,0 +1,111 @@
+﻿@model Business.Models.Books
+
+@{
+    ViewData["Title"] = "Delete Book";
+    var borrowedCount = Model.BorrowRecords?.Count(br => !br.Returned) ?? 0;
+    var canDelete = borrowedCount == 0;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h2>Confirm Delete</h2>
+                </div>
+                <div class="card-body">
+                    @if (!canDelete)
+                    {
+                        <div class="alert alert-danger">
+                            <h4 class="alert-heading">Cannot Delete Book</h4>
+                            <p>This book cannot be deleted because it has @borrowedCount active borrows.</p>
+                            <hr>
+                            <p class="mb-0">Please ensure all copies are returned before deleting.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <h4 class="alert-heading">Warning!</h4>
+                            <p>Are you sure you want to delete this book? This action cannot be undone.</p>
+                        </div>
+                    }
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Title</dt>
+                        <dd class="col-sm-9">@Model.Title</dd>
+
+                        <dt class="col-sm-3">Author</dt>
+                        <dd class="col-sm-9">@Model.Author</dd>
+
+                        <dt class="col-sm-3">ISBN</dt>
+                        <dd class="col-sm-9">@Model.ISBN</dd>
+
+                        <dt class="col-sm-3">Category</dt>
+                        <dd class="col-sm-9">@(Model.Category?.Name ?? "Uncategorized")</dd>
+
+                        <dt class="col-sm-3">Total Copies</dt>
+                        <dd class="col-sm-9">@Model.Quantity</dd>
+
+                        <dt class="col-sm-3">Created On</dt>
+                        <dd class="col-sm-9">@Model.CreateAt.ToString("MMMM dd, yyyy")</dd>
+                    </dl>
+
+                    @if (canDelete)
+                    {
+                        <form asp-action="Delete" class="mt-4">
+                            <input type="hidden" asp-for="ID" />
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirm Delete
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Book Status</h4>
+                </div>
+                <div class="card-body">
+                    <dl>
+                        <dt>Total Borrows</dt>
+                        <dd>@(Model.BorrowRecords?.Count ?? 0)</dd>
+
+                        <dt>Active Borrows</dt>
+                        <dd>@borrowedCount</dd>
+
+                        <dt>Available Copies</dt>
+                        <dd>@(Model.Quantity - borrowedCount)</dd>
+                    </dl>
+
+                    @if (Model.BorrowRecords != null && Model.BorrowRecords.Any(br => !br.Returned))
+                    {
+                        <div class="alert alert-info">
+                            <h5>Currently Borrowed By:</h5>
+                            <ul class="mb-0">
+                                @foreach (var record in Model.BorrowRecords.Where(br => !br.Returned))
+                                {
+                                    <li>@record.User.FullName (Due: @record.DueDate.ToString("MMM dd, yyyy"))</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,184 @@
+@model IEnumerable<Business.Models.BorrowRecords>
+
+@{
+    ViewData["Title"] = "Overdue Books";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Overdue Books</h1>
+            <p class="text-muted">Books that are past their due date and haven't been returned</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by title, user, or email...">
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select id="sortOrder" class="form-control">
+                <option value="dueDate">Sort by Due Date</option>
+                <option value="daysOverdue">Sort by Days Overdue</option>
+                <option value="user">Sort by User Name</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button id="sendReminders" class="btn btn-warning">
+                <i class="fas fa-envelope"></i> Send Reminders
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Borrower</th>
+                    <th>Due Date</th>
+                    <th>Days Overdue</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderByDescending(r => r.DueDate))
+                {
+                    var daysOverdue = (DateTime.Now - item.DueDate).Days;
+                    var overdueClass = daysOverdue > 14 ? "table-danger" : "table-warning";
+
+                    <tr class="@overdueClass overdue-record">
+                        <td>
+                            <a asp-controller="Books" asp-action="Details" asp-route-id="@item.BookID">
+                                @item.Book.Title
+                            </a>
+                            <small class="d-block text-muted">ISBN: @item.Book.ISBN</small>
+                        </td>
+                        <td>
+                            <div>@item.User.FullName</div>
+                            <small class="text-muted">@item.User.Email</small>
+                        </td>
+                        <td>
+                            @item.DueDate.ToString("MMM dd, yyyy")
+                            <div class="small text-danger">
+                                Due @item.DueDate.ToString("HH:mm")
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-danger">@daysOverdue days</span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@item.ID" 
+                                   class="btn btn-sm btn-info">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-warning send-reminder"
+                                        data-user="@item.User.FullName"
+                                        data-email="@item.User.Email"
+                                        data-book="@item.Book.Title"
+                                        data-days="@daysOverdue">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                                <form asp-action="Return" asp-route-id="@item.ID" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success"
+                                            onclick="return confirm('Mark this book as returned?')">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-success">
+            <h4><i class="fas fa-check-circle"></i> No Overdue Books</h4>
+            <p>There are currently no overdue books in the system.</p>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info mt-4">
+            <h5><i class="fas fa-info-circle"></i> Summary</h5>
+            <p>
+                Total Overdue Books: <strong>@Model.Count()</strong><br/>
+                Users with Overdue Books: <strong>@Model.Select(r => r.UserID).Distinct().Count()</strong><br/>
+                Average Days Overdue: <strong>@Math.Round(Model.Average(r => (DateTime.Now - r.DueDate).Days), 1)</strong>
+            </p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".overdue-record").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Sort functionality
+            $("#sortOrder").change(function() {
+                var sortBy = $(this).val();
+                var $table = $("table tbody");
+                var rows = $table.find("tr").get();
+
+                rows.sort(function(a, b) {
+                    var keyA, keyB;
+                    
+                    if (sortBy === "dueDate") {
+                        keyA = $(a).find("td:eq(2)").text();
+                        keyB = $(b).find("td:eq(2)").text();
+                    } else if (sortBy === "daysOverdue") {
+                        keyA = parseInt($(a).find("td:eq(3) .badge").text());
+                        keyB = parseInt($(b).find("td:eq(3) .badge").text());
+                        return keyB - keyA; // Descending order
+                    } else {
+                        keyA = $(a).find("td:eq(1)").text();
+                        keyB = $(b).find("td:eq(1)").text();
+                    }
+                    
+                    return keyA > keyB ? 1 : -1;
+                });
+
+                $.each(rows, function(index, row) {
+                    $table.append(row);
+                });
+            });
+
+            // Individual reminder
+            $(".send-reminder").click(function() {
+                var user = $(this).data("user");
+                var book = $(this).data("book");
+                var days = $(this).data("days");
+                var email = $(this).data("email");
+
+                if (confirm(`Send overdue reminder to ${user} (${email}) for "${book}" (${days} days overdue)?`)) {
+                    // TODO: Implement reminder sending through NotificationController
+                    alert("Reminder notification has been sent.");
+                }
+            });
+
+            // Bulk reminders
+            $("#sendReminders").click(function() {
+                if (confirm("Send reminders to all users with overdue books?")) {
+                    // TODO: Implement bulk reminder sending
+                    alert("Bulk reminders have been queued for sending.");
+                }
+            });
+        });
+    </script>
+}

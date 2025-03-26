@@ -1,0 +1,139 @@
+﻿@model Business.Models.Books
+
+@{
+    ViewData["Title"] = "Edit Book";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Edit Book</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="ID" />
+                        <input type="hidden" asp-for="CreateAt" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Title" class="control-label">Book Title</label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Author" class="control-label">Author</label>
+                            <input asp-for="Author" class="form-control" />
+                            <span asp-validation-for="Author" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="CategoryId" class="control-label">Category</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="ISBN" class="control-label">ISBN</label>
+                            <input asp-for="ISBN" class="form-control" />
+                            <span asp-validation-for="ISBN" class="text-danger"></span>
+                            <small class="form-text text-muted">ISBN must be unique across all books</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Quantity" class="control-label">Number of Copies</label>
+                            <input asp-for="Quantity" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                            <small id="quantityWarning" class="form-text text-danger d-none">
+                                Warning: Cannot set quantity below the number of currently borrowed books
+                            </small>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h4>Current Status</h4>
+                </div>
+                <div class="card-body">
+                    @{
+                        var borrowedCount = Model.BorrowRecords?.Count(br => !br.Returned) ?? 0;
+                        var availableCount = Model.Quantity - borrowedCount;
+                    }
+                    <dl>
+                        <dt>Total Copies</dt>
+                        <dd>@Model.Quantity</dd>
+
+                        <dt>Currently Borrowed</dt>
+                        <dd>@borrowedCount</dd>
+
+                        <dt>Available</dt>
+                        <dd>@availableCount</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>Guidelines</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <ul class="mb-0">
+                            <li>All fields are required</li>
+                            <li>ISBN must remain unique</li>
+                            <li>Quantity cannot be less than currently borrowed copies</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            var borrowedCount = @borrowedCount;
+
+            $("#Quantity").change(function () {
+                var quantity = parseInt($(this).val());
+                var warning = $("#quantityWarning");
+
+                if (quantity < borrowedCount) {
+                    warning.removeClass("d-none");
+                    $(this).val(borrowedCount);
+                } else {
+                    warning.addClass("d-none");
+                }
+            });
+
+            $("form").submit(function (e) {
+                var quantity = parseInt($("#Quantity").val());
+                if (quantity < borrowedCount) {
+                    e.preventDefault();
+                    alert("Quantity cannot be less than the number of currently borrowed books (" + borrowedCount + ")");
+                    return false;
+                }
+            });
+        });
+    </script>
+}

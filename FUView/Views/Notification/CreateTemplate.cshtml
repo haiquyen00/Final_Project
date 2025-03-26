@@ -1,0 +1,121 @@
+@model Business.Models.NotificationTemplate
+
+@{
+    ViewData["Title"] = "Create Notification Template";
+}
+
+<h1>Create Notification Template</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="CreateTemplate">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Name" class="control-label">Template Name</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <label asp-for="Type" class="control-label">Template Type</label>
+                <select asp-for="Type" class="form-control">
+                    <option value="DUE_REMINDER">Due Date Reminder</option>
+                    <option value="OVERDUE_NOTICE">Overdue Notice</option>
+                    <option value="RETURN_CONFIRMATION">Return Confirmation</option>
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <label asp-for="Subject" class="control-label">Email Subject</label>
+                <input asp-for="Subject" class="form-control" />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+                <small class="form-text text-muted">
+                    Available placeholders: {UserName}, {BookTitle}, {DueDate}, {ReturnDate}
+                </small>
+            </div>
+
+            <div class="form-group mt-3" id="daysBeforeDueGroup">
+                <label asp-for="DaysBeforeDue" class="control-label">Days Before Due Date</label>
+                <input asp-for="DaysBeforeDue" class="form-control" type="number" min="1" max="30" />
+                <span asp-validation-for="DaysBeforeDue" class="text-danger"></span>
+                <small class="form-text text-muted">Required for Due Date Reminders</small>
+            </div>
+
+            <div class="form-group mt-3">
+                <label asp-for="Template" class="control-label">Email Template</label>
+                <textarea asp-for="Template" class="form-control" rows="10"></textarea>
+                <span asp-validation-for="Template" class="text-danger"></span>
+                <small class="form-text text-muted">
+                    Available placeholders: {UserName}, {BookTitle}, {DueDate}, {ReturnDate}, {LibraryName}
+                </small>
+            </div>
+
+            <div class="form-group mt-3">
+                <label asp-for="Description" class="control-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <div class="form-check">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                    <label asp-for="IsActive" class="form-check-label">Active Template</label>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a asp-action="Templates" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Template Guide</h5>
+            </div>
+            <div class="card-body">
+                <h6>Available Placeholders:</h6>
+                <ul>
+                    <li>{UserName} - Reader's full name</li>
+                    <li>{BookTitle} - Title of the book</li>
+                    <li>{DueDate} - Due date of the book</li>
+                    <li>{ReturnDate} - Date when book was returned</li>
+                    <li>{LibraryName} - Name of the library</li>
+                </ul>
+                <h6>Example Template:</h6>
+                <pre class="bg-light p-2">
+Dear {UserName},
+
+This is a reminder that "{BookTitle}" is due on {DueDate}.
+
+Please return the book on time to avoid late fees.
+
+Best regards,
+{LibraryName}
+</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            function toggleDaysBeforeDue() {
+                if ($("#Type").val() === "DUE_REMINDER") {
+                    $("#daysBeforeDueGroup").show();
+                } else {
+                    $("#daysBeforeDueGroup").hide();
+                }
+            }
+
+            $("#Type").change(toggleDaysBeforeDue);
+            toggleDaysBeforeDue();
+        });
+    </script>
+}

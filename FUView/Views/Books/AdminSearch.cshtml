@@ -1,0 +1,73 @@
+﻿@* @model IEnumerable<Business.Models.Books> *@
+
+@* @{ *@
+@*     ViewData["Title"] = "Quản lý tìm kiếm bàn"; *@
+@* } *@
+
+@* <h1>Quản lý tìm kiếm bàn</h1> *@
+
+@* <form asp-action="AdminSearch" method="post"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-4"> *@
+@*             <div class="form-group"> *@
+@*                 <label for="minSeats">Số ghế tối thiểu</label> *@
+@*                 <input type="number" class="form-control" id="minSeats" name="minSeats" min="1" /> *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="col-md-4"> *@
+@*             <div class="form-group"> *@
+@*                 <label for="maxSeats">Số ghế tối đa</label> *@
+@*                 <input type="number" class="form-control" id="maxSeats" name="maxSeats" min="1" /> *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="col-md-4"> *@
+@*             <div class="form-group"> *@
+@*                 <label for="status">Trạng thái</label> *@
+@*                 <select class="form-control" id="status" name="status"> *@
+@*                     <option value="">Tất cả</option> *@
+@*                     <option value="Available">Có sẵn</option> *@
+@*                     <option value="Reserved">Đã đặt trước</option> *@
+@*                     <option value="Occupied">Đang sử dụng</option> *@
+@*                 </select> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@*     <button type="submit" class="btn btn-primary mt-3">Tìm kiếm</button> *@
+@* </form> *@
+
+@* <h2 class="mt-4">Kết quả tìm kiếm</h2> *@
+
+@* @if (Model != null && Model.Any()) *@
+@* { *@
+@*     <table class="table"> *@
+@*         <thead> *@
+@*             <tr> *@
+@*                 <th>@Html.DisplayNameFor(model => model.Tablenumber)</th> *@
+@*                 <th>@Html.DisplayNameFor(model => model.Seats)</th> *@
+@*                 <th>@Html.DisplayNameFor(model => model.Status)</th> *@
+@*                 <th>Thao tác</th> *@
+@*             </tr> *@
+@*         </thead> *@
+@*         <tbody> *@
+@*             @foreach (var item in Model) *@
+@*             { *@
+@*                 <tr> *@
+@*                     <td>@Html.DisplayFor(modelItem => item.Tablenumber)</td> *@
+@*                     <td>@Html.DisplayFor(modelItem => item.Seats)</td> *@
+@*                     <td>@Html.DisplayFor(modelItem => item.Status)</td> *@
+@*                     <td> *@
+@*                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Sửa</a> *@
+@*                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Chi tiết</a> *@
+@*                         <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Xóa</a> *@
+@*                     </td> *@
+@*                 </tr> *@
+@*             } *@
+@*         </tbody> *@
+@*     </table> *@
+@* } *@
+@* else *@
+@* { *@
+@*     <div class="alert alert-info"> *@
+@*         <p>Không tìm thấy bàn nào phù hợp với tiêu chí tìm kiếm.</p> *@
+@*     </div> *@
+@* } *@
