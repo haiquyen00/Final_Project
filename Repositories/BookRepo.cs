@@ -1,4 +1,4 @@
-using Business;
+Ôªøusing Business;
 using Business.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -55,17 +55,17 @@ namespace Repositories
 
         private bool IsValidIsbn(string isbn)
         {
-            // Lo?i b? d?u g?ch ngang v‡ kho?ng tr?ng
+            // Lo?i b? d?u g?ch ngang v√† kho?ng tr?ng
             isbn = isbn?.Replace("-", "").Replace(" ", "").Trim();
 
             if (string.IsNullOrEmpty(isbn))
                 return false;
 
-            // Ki?m tra ?? d‡i
+            // Ki?m tra ?? d√†i
             if (isbn.Length != 10 && isbn.Length != 13)
                 return false;
 
-            // Ki?m tra ch? ch?a s? (v‡ 'X' ? cu?i ??i v?i ISBN-10)
+            // Ki?m tra ch? ch?a s? (v√† 'X' ? cu?i ??i v?i ISBN-10)
             if (isbn.Length == 10)
             {
                 return isbn.Substring(0, 9).All(char.IsDigit) &&
@@ -80,24 +80,30 @@ namespace Repositories
         {
             try
             {
-                // Chu?n hÛa ISBN
-                book.ISBN = book.ISBN?.Replace("-", "").Replace(" ", "").Trim();
-
-                if (!IsValidIsbn(book.ISBN))
+                // Validate required fields
+                if (string.IsNullOrEmpty(book.Title) ||
+                    string.IsNullOrEmpty(book.ISBN) ||
+                    string.IsNullOrEmpty(book.Publisher) ||
+                    book.CategoryId <= 0)
                 {
-                    _logger.LogWarning("Invalid ISBN format: {ISBN}", book.ISBN);
                     return false;
                 }
 
-                // Ki?m tra tr˘ng l?p
-                if (await IsbnExistsAsync(book.ISBN))
+                // Normalize ISBN
+                book.ISBN = book.ISBN.Replace("-", "").Replace(" ", "").Trim();
+
+                // Check for duplicate ISBN
+                if (await _context.Book.AnyAsync(b => b.ISBN == book.ISBN))
                 {
-                    _logger.LogWarning("Duplicate ISBN: {ISBN}", book.ISBN);
                     return false;
                 }
+
+                // Initialize collections if null
+                book.BorrowRecords ??= new List<BorrowRecords>();
 
                 await _context.Book.AddAsync(book);
                 await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception ex)
@@ -106,6 +112,7 @@ namespace Repositories
                 return false;
             }
         }
+
 
 
         private string NormalizeIsbn(string isbn)

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FUView")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+312e55f0108274919b62fd4bb76d8bde81fe26b6")]
 [assembly: System.Reflection.AssemblyProductAttribute("FUView")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FUView")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -28,13 +28,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\FUView.781m8qeiya.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"781m8qeiya"},{"Name":"integrity","Value":"sha256-t7/uTHEwB3QE1GHTXoYL0tFapsfBwXv4z2W867DegRc="},{"Name":"label","Value":"_content/FUView/FUView.bundle.scp.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1124"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022t7/uTHEwB3QE1GHTXoYL0tFapsfBwXv4z2W867DegRc=\u0022"},{"Name":"Last-Modified","Value":"Tue, 25 Mar 2025 09:55:18 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1124"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022t7/uTHEwB3QE1GHTXoYL0tFapsfBwXv4z2W867DegRc=\u0022"},{"Name":"Last-Modified","Value":"Wed, 26 Mar 2025 18:00:59 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/FUView/FUView.bundle.scp.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\FUView.781m8qeiya.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-t7/uTHEwB3QE1GHTXoYL0tFapsfBwXv4z2W867DegRc="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1124"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022t7/uTHEwB3QE1GHTXoYL0tFapsfBwXv4z2W867DegRc=\u0022"},{"Name":"Last-Modified","Value":"Tue, 25 Mar 2025 09:55:18 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1124"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022t7/uTHEwB3QE1GHTXoYL0tFapsfBwXv4z2W867DegRc=\u0022"},{"Name":"Last-Modified","Value":"Wed, 26 Mar 2025 18:00:59 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/FUView/js/site.js">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))</AssetFile>

@@ -34,12 +34,11 @@
 
                         <div class="form-group mb-3">
                             <label asp-for="CategoryId" class="control-label"></label>
-                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select">
+                            <select asp-for="CategoryId" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "ID", "Name"))">
                                 <option value="">-- Chọn danh mục --</option>
                             </select>
                             <span asp-validation-for="CategoryId" class="text-danger"></span>
                         </div>
-
                         <div class="form-group mb-3">
                             <label asp-for="ISBN" class="control-label"></label>
                             <input asp-for="ISBN" class="form-control" />
@@ -61,7 +60,7 @@
 
                         <div class="form-group mb-3">
                             <label asp-for="Publisher" class="control-label"></label>
-                            <input asp-for="Publisher" class="form-control" />
+                            <input asp-for="Publisher" class="form-control" required />
                             <span asp-validation-for="Publisher" class="text-danger"></span>
                         </div>
 
@@ -139,5 +138,32 @@
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#CategoryId').change(function() {
+                console.log('Selected CategoryId:', $(this).val()); // Để debug
+                if (!$(this).val()) {
+                    $(this).addClass('is-invalid');
+                    $(this).siblings('.text-danger').text('Vui lòng chọn danh mục');
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $(this).siblings('.text-danger').text('');
+                }
+            });
+
+            $('form').submit(function(e) {
+                if (!$('#CategoryId').val()) {
+                    e.preventDefault();
+                    $('#CategoryId').addClass('is-invalid');
+                    $('#CategoryId').siblings('.text-danger').text('Vui lòng chọn danh mục');
+                    return false;
+                }
+            });
+        });
+    </script>
 }
+
+
+
 

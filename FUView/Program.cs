@@ -50,8 +50,15 @@ builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IBorrowRecordRepo, BorrowRecordRepo>();
 builder.Services.AddScoped<INotificationTemplateRepo, NotificationTemplateRepo>();
 builder.Services.AddScoped<INotificationLogRepo, NotificationLogRepo>();
-
+builder.Services.AddScoped<ISessionRepo, SessionRepo>();
 // Configure Logging
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 builder.Services.AddLogging(logging =>
 {
     logging.ClearProviders();
@@ -76,6 +83,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();  // Thêm dòng này
 
 app.UseAuthentication();
 app.UseAuthorization();

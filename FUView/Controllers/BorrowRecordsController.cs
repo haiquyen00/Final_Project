@@ -68,6 +68,7 @@ namespace FUView.Controllers
         }
 
         // GET: BorrowRecords/Create
+        // GET: BorrowRecords/Create
         public async Task<IActionResult> Create(int? bookId)
         {
             if (bookId == null)
@@ -82,68 +83,56 @@ namespace FUView.Controllers
             }
 
             var userId = int.Parse(User.FindFirstValue("UserId"));
-            
+
+            // Kiểm tra các điều kiện mượn sách
             if (await _borrowRepo.HasOverdueBooksAsync(userId))
             {
-                TempData["Error"] = "You have overdue books. Please return them before borrowing more.";
+                TempData["Error"] = "Bạn có sách quá hạn. Vui lòng trả sách trước khi mượn thêm.";
                 return RedirectToAction("Details", "Books", new { id = bookId });
             }
 
             if (!await _borrowRepo.CanBorrowMoreBooksAsync(userId))
             {
-                TempData["Error"] = "You have reached the maximum number of books you can borrow.";
+                TempData["Error"] = "Bạn đã đạt giới hạn số sách được mượn.";
                 return RedirectToAction("Details", "Books", new { id = bookId });
             }
 
             if (!await _bookRepo.IsBookAvailableAsync(bookId.Value))
             {
-                TempData["Error"] = "This book is currently not available.";
+                TempData["Error"] = "Sách này hiện không có sẵn.";
                 return RedirectToAction("Details", "Books", new { id = bookId });
             }
 
             ViewBag.Book = book;
-            return View(new BorrowRecords { BookID = bookId.Value, UserID = userId });
+            ViewBag.BookId = bookId;
+
+            return View(new BorrowRecords());
         }
 
-        // POST: BorrowRecords/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BookID")] BorrowRecords record)
+        public async Task<IActionResult> Create(int bookId)
         {
             var userId = int.Parse(User.FindFirstValue("UserId"));
-            record.UserID = userId;
-            record.BorrowDate = DateTime.Now;
-            record.DueDate = DateTime.Now.AddDays(14);
-            record.Returned = false;
 
-            if (ModelState.IsValid)
+            // Tạo bản ghi mượn sách
+            var borrowRecord = new BorrowRecords
             {
-                if (await _borrowRepo.CreateBorrowRecordAsync(record))
-                {
-                    // Send borrow confirmation notification
-                    var borrowTemplate = await _templateRepo.GetTemplateForEventAsync("BORROW_CONFIRMATION");
-                    if (borrowTemplate != null)
-                    {
-                        var borrowedBook = await _bookRepo.GetBookByIdAsync(record.BookID);
-                        var borrowNotification = new NotificationLog
-                        {
-                            UserId = userId,
-                            NotificationTemplateId = borrowTemplate.ID,
-                            Type = "BORROW_CONFIRMATION",
-                            Subject = $"Book Borrowed: {borrowedBook.Title}",
-                            Content = $"You have borrowed {borrowedBook.Title}. Due date: {record.DueDate:d}",
-                            BorrowRecordId = record.ID
-                        };
-                        await _notificationRepo.CreateLogAsync(borrowNotification);
-                    }
+                UserID = userId,
+                BookID = bookId,
+                BorrowDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(14),
+                Returned = false
+            };
 
-                    return RedirectToAction(nameof(Index));
-                }
+            if (await _borrowRepo.CreateBorrowRecordAsync(borrowRecord))
+            {
+                TempData["Success"] = "Mượn sách thành công!";
+                return RedirectToAction(nameof(Index));
             }
 
-            var book = await _bookRepo.GetBookByIdAsync(record.BookID);
-            ViewBag.Book = book;
-            return View(record);
+            TempData["Error"] = "Không thể mượn sách. Vui lòng thử lại.";
+            return RedirectToAction("Details", "Books", new { id = bookId });
         }
 
         // POST: BorrowRecords/Return/5

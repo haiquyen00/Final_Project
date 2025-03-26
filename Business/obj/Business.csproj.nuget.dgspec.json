@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HELLO\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj": {}
+    "C:\\Users\\Admin\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HELLO\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj": {
+    "C:\\Users\\Admin\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HELLO\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj",
         "projectName": "Business",
-        "projectPath": "C:\\Users\\HELLO\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj",
-        "packagesPath": "C:\\Users\\HELLO\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HELLO\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\Business.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\Desktop\\PE_PRN222\\SP25_PRN222_DE170075\\Business\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\HELLO\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -53,6 +53,10 @@
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.0.3, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Core": {
+              "target": "Package",
+              "version": "[2.3.0, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",

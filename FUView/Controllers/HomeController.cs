@@ -15,11 +15,12 @@ namespace FUView.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IAuthenticationRepo _repo;
-
-        public HomeController(ILogger<HomeController> logger, IAuthenticationRepo authenticationRepo)
+        private readonly ISessionRepo _sessionRepo; 
+        public HomeController(ILogger<HomeController> logger, IAuthenticationRepo authenticationRepo,ISessionRepo sessionRepo)
         {
             _logger = logger;
             _repo = authenticationRepo;
+            _sessionRepo = sessionRepo;
         }
 
         [AllowAnonymous]
@@ -59,6 +60,15 @@ namespace FUView.Controllers
             var user = await _repo.CheckLogin(model.Email, model.Password);
             if (user != null)
             {
+                var session = await _sessionRepo.CreateSessionAsync(user.Id, user.Role);
+
+                Response.Cookies.Append("SessionId", session.SessionID, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = session.ExpiresAt
+                });
                 await SignInUser(user);
                 _logger.LogInformation("User {Email} logged in successfully", user.Email);
                 return RedirectToUserHomePage();
@@ -129,16 +139,37 @@ namespace FUView.Controllers
         }
 
 
-
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            _logger.LogInformation("User logged out successfully.");
-            TempData["Success"] = "You have been logged out successfully.";
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                // Lấy sessionId từ cookie
+                var sessionId = Request.Cookies["SessionId"];
+                if (!string.IsNullOrEmpty(sessionId))
+                {
+                    // Xóa session từ database
+                    await _sessionRepo.DeleteSessionAsync(sessionId);
+                }
+
+                // Xóa authentication cookie
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                // Xóa tất cả cookies
+                foreach (var cookie in Request.Cookies.Keys)
+                {
+                    Response.Cookies.Delete(cookie);
+                }
+
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                return RedirectToAction("Login");
+            }
         }
+
 
         [Authorize(Roles = "Admin")]
         public IActionResult Privacy()
@@ -189,47 +220,5 @@ namespace FUView.Controllers
                 : RedirectToAction("Index", "Home");
         }
 
-        private bool IsPasswordValid(string password, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-
-            if (string.IsNullOrEmpty(password))
-            {
-                errorMessage = "Password is required.";
-                return false;
-            }
-
-            if (password.Length < 8)
-            {
-                errorMessage = "Password must be at least 8 characters long.";
-                return false;
-            }
-
-            if (!Regex.IsMatch(password, @"[A-Z]"))
-            {
-                errorMessage = "Password must contain at least one uppercase letter.";
-                return false;
-            }
-
-            if (!Regex.IsMatch(password, @"[a-z]"))
-            {
-                errorMessage = "Password must contain at least one lowercase letter.";
-                return false;
-            }
-
-            if (!Regex.IsMatch(password, @"[0-9]"))
-            {
-                errorMessage = "Password must contain at least one number.";
-                return false;
-            }
-
-            if (!Regex.IsMatch(password, @"[^a-zA-Z0-9]"))
-            {
-                errorMessage = "Password must contain at least one special character.";
-                return false;
-            }
-
-            return true;
-        }
     }
 }

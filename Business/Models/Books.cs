@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,6 +13,14 @@ namespace Business.Models
     [Index(nameof(ISBN), IsUnique = true)]
     public class Books
     {
+        public Books()
+        {
+            BorrowRecords = new HashSet<BorrowRecords>();
+            CoverImageUrl = "https://via.placeholder.com/150";
+            GoogleBooksId = "";
+
+
+        }
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
@@ -27,6 +36,7 @@ namespace Business.Models
 
         [Required(ErrorMessage = "Vui lòng chọn danh mục")]
         [Display(Name = "Danh mục")]
+        [Range(1, int.MaxValue, ErrorMessage = "Vui lòng chọn danh mục hợp lệ")]
         public int CategoryId { get; set; }
 
         [Required(ErrorMessage = "ISBN là bắt buộc")]
@@ -59,7 +69,7 @@ namespace Business.Models
 
         public string GoogleBooksId { get; set; }
 
-        // Navigation Properties
+        [ValidateNever]
         public virtual Category Category { get; set; }
         public virtual ICollection<BorrowRecords> BorrowRecords { get; set; }
     }

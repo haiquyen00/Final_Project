@@ -50,39 +50,73 @@ namespace FUView.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            var categories = await _categoryRepo.GetAllCategoriesAsync();
-            ViewBag.Categories = new SelectList(categories, "ID", "Name");
-            return View();
+            try
+            {
+                var categories = await _categoryRepo.GetAllCategoriesAsync();
+                if (categories == null || !categories.Any())
+                {
+                    TempData["Error"] = "Không có danh mục nào. Vui lòng tạo danh mục trước.";
+                    return RedirectToAction("Index", "Category");
+                }
+
+                ViewBag.Categories = categories;
+                return View(new Books());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tải danh mục");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh mục";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Author,CategoryId,ISBN,Quantity,Description")] Books book)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create([Bind("Title,Author,CategoryId,ISBN,Quantity,Description,Publisher,PublishedDate")] Books book)
         {
-            // Chuẩn hóa ISBN trước khi validate
-            book.ISBN = book.ISBN?.Replace("-", "").Replace(" ", "").Trim();
-
-            if (ModelState.IsValid)
+            try
             {
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.Categories = await _categoryRepo.GetAllCategoriesAsync();
+                    return View(book);
+                }
+
+                if (book.CategoryId <= 0)
+                {
+                    ModelState.AddModelError("CategoryId", "Vui lòng chọn danh mục");
+                    ViewBag.Categories = await _categoryRepo.GetAllCategoriesAsync();
+                    return View(book);
+                }
+
+                if (!await _categoryRepo.CategoryExistsAsync(book.CategoryId))
+                {
+                    ModelState.AddModelError("CategoryId", "Danh mục không tồn tại");
+                    ViewBag.Categories = await _categoryRepo.GetAllCategoriesAsync();
+                    return View(book);
+                }
+
                 if (await _bookRepo.CreateBookAsync(book))
                 {
                     TempData["Success"] = "Thêm sách thành công";
                     return RedirectToAction(nameof(Index));
                 }
 
-                ModelState.AddModelError("ISBN", "ISBN không hợp lệ hoặc đã tồn tại");
+                ModelState.AddModelError("", "Không thể thêm sách");
+                ViewBag.Categories = await _categoryRepo.GetAllCategoriesAsync();
+                return View(book);
             }
-
-            await PrepareViewBagForCreate();
-            return View(book);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tạo sách mới");
+                ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng thử lại sau.");
+                ViewBag.Categories = await _categoryRepo.GetAllCategoriesAsync();
+                return View(book);
+            }
         }
 
 
-        private async Task PrepareViewBagForCreate()
-        {
-            var categories = await _categoryRepo.GetAllCategoriesAsync();
-            ViewBag.Categories = new SelectList(categories, "ID", "Name");
-        }
 
         // GET: Books/Edit/5
         [Authorize(Roles = "Admin")]
@@ -108,7 +142,7 @@ namespace FUView.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,Author,CategoryId,ISBN,Quantity")] Books book)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,Author,CategoryId,ISBN,Quantity,Publisher,Description")] Books book)
         {
             if (id != book.ID)
             {
